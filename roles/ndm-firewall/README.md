@@ -37,7 +37,7 @@ None
 
     - hosts: vagrant-boxes
       roles:
-         - role: ndm_firewall
+         - role: ivansible.ndm_firewall
            variable1: 1
            variable2: 2
 
