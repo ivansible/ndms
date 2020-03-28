@@ -1,3 +1,26 @@
 ---
 # defaults for ivansible.ndm_wireguard
+
+ndm_wg_host: ~
+ndm_wg_port: 0
+ndm_wg_addr: ~
+
+ndm_wg_key: ~
+ndm_wg_pub: ~
+ndm_wg_psk: ~
+
+ndm_wg_mtu: 1420
+ndm_wg_keepalive: 0
+
+ndm_wg_peers: []
+# each peer record has the following fields:
+# - name: relay       - peer name (REQUIRED)
+#   active: true      - optional boolean flag (default: true)
+#   host: ~           - peer ip address (REQUIRED)
+#   addr: 10.1.1.1/24 - local address on network with the peer (default: ndm_wg_addr)
+#   port: 0           - peer port (REQUIRED)
+#   key: ~            - peer private key, informational (optional)
+#   pub: ~            - peer public key (REQUIRED)
+#   psk: ~            - pre-shared key (optional)
+#   ips: [ip/mask]    - allowed IPs, list of ip/mask pairs
 ...

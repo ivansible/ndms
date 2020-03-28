@@ -1,6 +1,21 @@
 ---
-- name: become root and install role
-  import_tasks: root.yml
-  become: true
-  tags: role_all
+- name: setup wireguard interfaces
+  include_tasks: peer.yml
+  args:
+    apply:
+      tags:
+        - ndm_wg_all
+        - ndm_wireguard_all
+  loop: "{{ ndm_wg_peers |default([],true) }}"
+  loop_control:
+    loop_var: peer
+    index_var: index
+    label: "{{ name }}"
+  when: peer.name |default('')
+  vars:
+    name: "{{ peer.name |default('') }}"
+    iface: "Wireguard{{ index }}"
+  tags:
+    - ndm_wg_all
+    - ndm_wireguard_all
 ...

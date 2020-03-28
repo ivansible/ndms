@@ -1,0 +1,11 @@
+{
+  "up": {{ peer.active |default(true) |bool |to_json }},
+  "wireguard": {
+    {% if ndm_wg_port |default(0) %}
+      "listen-port": {"port": "{{ ndm_wg_port |int }}"},
+    {% else %}
+      "listen-port": {"no": true},
+    {% endif %}
+    "private-key": "{{ ndm_wg_key }}"
+  }
+}
