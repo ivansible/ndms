@@ -1,6 +1,95 @@
 ---
-- name: become root and install role
-  import_tasks: root.yml
-  become: true
-  tags: role_all
+- name: query current interface config
+  restconf_get:
+    path: /show/rc/interface
+  register: ndm_if_config
+  when: ndm_ovpn_servers |default([])
+  tags:
+    - ndm_ovpn_all
+    - ndm_openvpn_all
+
+
+- name: configure ndm openvpn interfaces
+  restconf_config2:
+    path: "/interface/{{ if_name }}"
+    content: "{{ request_body |to_json }}"
+  when: update |bool
+  changed_when: update |bool
+  register: update_interface_config
+  loop: "{{ ndm_ovpn_servers |default([],true) }}"
+  loop_control:
+    label: "{{ item.name }}"
+    index_var: item_idx
+  tags:
+    - skip_ansible_lint
+    - ndm_ovpn_all
+    - ndm_openvpn_all
+  vars:
+    request_body:
+      authentication: {'no': true}
+      description: "{{ new_ifname }}"
+      role: [misc]
+      ip:
+        tcp: {adjust-mss: {pmtu: true}}
+        address: {'no': true}
+        name-server: false
+        mtu: {'no': true}
+      openvpn:
+        accept-routes: true
+        config: {config: "{{ new_config }}"}
+        connect: {via: '', 'no': false}
+      schedule: {'no': true}
+      up: {'no': "{{ not new_active }}"}
+
+    if_name: "OpenVPN{{ item_idx }}"
+    if_object: "{{ ndm_if_config.response[if_name] |default({}) }}"
+    update: "{{ old_ifname != new_ifname or old_active != new_active or old_config != new_config }}"
+
+    old_ifname: "{{ if_object.description |default('?') |string }}"
+    old_active: "{{ if_object.up |default(false) |bool }}"
+    old_config: "{{ if_object.openvpn.config.config |default('?') |string }}"
+    new_ifname: "ovpn-{{ client_name }}"
+    new_config: "{{ lookup('template', 'client.ovpn').strip() }}"
+    new_active: "{{ item.active |default(true) }}"
+
+    server_name: ndm
+    client_name: "{{ item.name }}"
+    server_host: "{{ item.host }}"
+    server_cname: "{{ item.cname }}"
+    visible_port: "{{ item.port }}"
+    client_proto: "{{ 'udp' if item.proto == 'udp' else 'tcp-client' }}"
+
+    proxy: "{{ item.proxy |default('',true) |string }}"
+    proxy_url: "{{ proxy if '//' in proxy else '//' + proxy }}"
+    proxy_type: "{{ proxy_url |urlsplit('scheme') or 'socks5' }}"
+    proxy_host: "{{ proxy_url |urlsplit('hostname') or '127.0.0.1' }}"
+    proxy_port: "{{ proxy_url |urlsplit('port') or 1080 }}"
+
+    client_crt_text: "{{ item.client_cert }}"
+    client_key_text: "{{ item.client_key }}"
+    ovpn_ca_cert: "{{ item.ca_cert }}"
+    ovpn_tlscrypt_key: "{{ item.tlscrypt_key }}"
+
+    ovpn_curve: "{{ ndm_ovpn_curve }}"
+    ovpn_cipher: "{{ ndm_ovpn_cipher }}"
+    ovpn_cc_cipher: "{{ ndm_ovpn_cc_cipher }}"
+    ovpn_hmac_alg: "{{ ndm_ovpn_hmac_alg }}"
+    ovpn_reneg_sec: "{{ ndm_ovpn_reneg_sec }}"
+    ovpn_compress: "{{ ndm_ovpn_compress }}"
+
+    client_device: tun
+    interface_name: ~
+    ovpn_prevent_dns_leak: false
+
+
+- name: save new ndm configuration
+  restconf_config2:
+    path: /system/configuration
+    content: '{"save": true}'
+  ## flush_handlers is unsupported on this connection
+  when: update_interface_config is changed
+  tags:
+    - skip_ansible_lint
+    - ndm_ovpn_all
+    - ndm_openvpn_all
 ...

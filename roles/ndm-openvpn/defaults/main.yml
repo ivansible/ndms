@@ -1,3 +1,25 @@
 ---
 # defaults for ivansible.ndm_openvpn
+
+ndm_ovpn_servers: []
+#  - name: default                # server name
+#    active: true                 # optional flag
+#    host: myserver.com           # server host or address
+#    port: 1194                   # server port
+#    proto: udp                   # tcp or udp
+#    proxy: ~                     # optional, eg. socks5://address:port
+#    client_cert: '--- BEGIN...'  # client certificate as text
+#    client_key: '--- BEGIN...'   # client key as text
+#    server_cert: '--- BEGIN...'  # server certificate as text
+#    ca_cert: '--- BEGIN...'      # CA certificate as text
+
+## Settings below this line must be synchronized between openvpn roles
+
+ndm_ovpn_curve: prime256v1
+ndm_ovpn_cipher: AES-128-GCM
+ndm_ovpn_cc_cipher: TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256
+ndm_ovpn_hmac_alg: SHA256
+
+ndm_ovpn_reneg_sec: ~  # cipher renegotiantion interval (default: 1 hour)
+ndm_ovpn_compress: ~   # one of: lz4-v2, lz4, lzo, none (default: no compression)
 ...
