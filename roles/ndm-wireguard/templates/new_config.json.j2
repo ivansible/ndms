@@ -1,0 +1,60 @@
+{
+  "description": "wg-{{ item.name }}",
+  "up": {{ item.active |default(true) |bool |to_json }},
+  "ip": {
+    "address": {
+      "address": "{{ item.addr |default(ndm_wg_addr) |ipaddr('address') or addr |ipaddr('network') }}",
+      "mask": "{{ item.addr |default(ndm_wg_addr) |ipaddr('netmask') }}"
+    },
+{% if ndm_wg_mtu |default(0) %}
+      "mtu": "{{ ndm_wg_mtu }}",
+{% endif %}
+    "tcp": {
+      "adjust-mss": {
+        "pmtu": true
+      }
+    }
+  },
+  "security-level": {
+    "public": true
+  },
+  "wireguard": {
+    "listen-port": {
+{% if ndm_wg_port |default(0) %}
+        "port": "{{ ndm_wg_port |int }}"
+{% else %}
+        "no": true
+{% endif %}
+    },
+    "private-key": "{{ priv_key }}",
+    "peer": [
+{% for peer in [item] %}
+      {
+        "allow-ips": [
+{%   for ip in peer.ips |default([],true) %}
+          {
+            "address": "{{ ip |ipaddr('address') or ip |ipaddr('network') }}",
+            "mask": "{{ ip |ipaddr('netmask') }}"
+          }{{ loop.last |ternary('',',') }}
+{%   endfor %}
+        ],
+{%   if peer.host |default('') and peer.port |default(0) %}
+        "endpoint": {
+          "address": "{{ peer.host }}:{{ peer.port |int }}"
+        },
+{%   endif %}
+{%   if ndm_wg_keepalive |default(0) %}
+        "keepalive-interval": {
+          "interval": {{ ndm_wg_keepalive |int }}
+        },
+{%   endif %}
+{%   if peer.psk |default('') %}
+        "preshared-key": "{{ peer.psk }}",
+{%   endif %}
+        "key": "{{ peer.pub }}",
+        "comment": "{{ peer.name }}"
+      }{{ loop.last |ternary('',',') }}
+{% endfor %}
+    ]
+  }
+}

@@ -19,7 +19,7 @@ ndm_wg_peers: []
 #   host: ~           - peer ip address (REQUIRED)
 #   addr: 10.1.1.1/24 - local address on network with the peer (default: ndm_wg_addr)
 #   port: 0           - peer port (REQUIRED)
-#   key: ~            - peer private key, informational (optional)
+#   key: ~            - peer private key (REQUIRED)
 #   pub: ~            - peer public key (REQUIRED)
 #   psk: ~            - pre-shared key (optional)
 #   ips: [ip/mask]    - allowed IPs, list of ip/mask pairs

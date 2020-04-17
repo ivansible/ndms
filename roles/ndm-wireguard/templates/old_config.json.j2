@@ -1,0 +1,60 @@
+{
+  "description": "{{ cfg.description |default('?') }}",
+  "up": {{ cfg.up |default(false) |bool |to_json }},
+  "ip": {
+    "address": {
+      "address": "{{ cfg.ip.address.address |default('?') }}",
+      "mask": "{{ cfg.ip.address.mask |default('?') }}"
+    },
+{% if cfg.ip.mtu |default(0) %}
+      "mtu": "{{ cfg.ip.mtu }}",
+{% endif %}
+    "tcp": {
+      "adjust-mss": {
+        "pmtu": true
+      }
+    }
+  },
+  "security-level": {
+    "public": true
+  },
+  "wireguard": {
+    "listen-port": {
+{% if cfg.wireguard['listen-port'].port |default(0) %}
+        "port": "{{ cfg.wireguard['listen-port'].port }}"
+{% else %}
+        "no": true
+{% endif %}
+    },
+    "private-key": "{{ priv_key }}",
+    "peer": [
+{% for peer in cfg.wireguard.peer |default([],true) %}
+      {
+        "allow-ips": [
+{%   for ip in peer['allow-ips'] |default([],true) %}
+          {
+            "address": "{{ ip.address |default('?') }}",
+            "mask": "{{ ip.mask |default('?') }}"
+          }{{ loop.last |ternary('',',') }}
+{%   endfor %}
+        ],
+{%   if peer.endpoint.address |default('') %}
+        "endpoint": {
+          "address": "{{ peer.endpoint.address |default('?') }}"
+        },
+{%   endif %}
+{%   if peer['keepalive-interval'].interval |default(0) %}
+        "keepalive-interval": {
+          "interval": {{ peer['keepalive-interval'].interval }}
+        },
+{%   endif %}
+{%   if peer['preshared-key'] |default('') %}
+        "preshared-key": "{{ peer['preshared-key'] }}",
+{%   endif %}
+        "key": "{{ peer.key |default('?') }}",
+        "comment": "{{ peer.comment |default('?') }}"
+      }{{ loop.last |ternary('',',') }}
+{% endfor %}
+    ]
+  }
+}
