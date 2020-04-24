@@ -1,0 +1,59 @@
+[
+{% set ns = namespace(index=0) %}
+{% for r in rules %}
+{%   set last_rule = loop.last %}
+{%   set disable = r.disable |default(false) |bool %}
+{%   set permit = r.permit |default(false) |bool %}
+{%   set action = permit |ternary('permit', 'deny') %}
+{%   set sport = r.sport |default(0,true) |int %}
+{%   set proto_val = r.proto |default('inet', true) %}
+{%   set port_val = r.dport |default(r.port) |default('')
+                    if proto_val in ['tcp', 'udp', 'inet']
+                    else '' %}
+{%   set port_str = port_val |string
+                    if port_val is string or port_val is integer
+                    else port_val |flatten |join(',') %}
+{%   for port_tok in port_str.strip().split(',') %}
+{%     set last_port = loop.last %}
+{%     set port_s = port_tok.strip() |replace(':','-') %}
+{%     set port = port_s.split('/').0 if '/' in port_s else port_s %}
+{%     set proto_str = port_s.split('/').1 if '/' in port_s else proto_val %}
+{%     set proto_list = ['tcp', 'udp'] if proto_str == 'inet' else [proto_str] %}
+{%     for proto in proto_list %}
+{%       set last_proto = loop.last %}
+        {
+          "acl": "{{ acl_name }}",
+          "action": "{{ action }}",
+{% if disable %}
+          "disable": true,
+{% endif %}
+          "protocol": "{{ proto }}",
+{%      if r.src |default('') %}
+          "source": "{{ r.src |ipaddr('address') or r.src |ipaddr('network') }}",
+          "source-mask": "{{ r.src |ipaddr('netmask') }}",
+{%      else %}
+          "source": "0.0.0.0",
+          "source-mask": "0.0.0.0",
+{%      endif %}
+{%      if r.dst |default('') %}
+          "destination": "{{ r.dst |ipaddr('address') or r.dst |ipaddr('network') }}",
+          "destination-mask": "{{ r.dst |ipaddr('netmask') }}",
+{%      else %}
+          "destination": "0.0.0.0",
+          "destination-mask": "0.0.0.0",
+{%      endif %}
+{%      if '-' in port %}
+          "dst-port-operator": "range",
+          "destination-port": "{{ port.split('-').0 |int }}",
+          "destination-end-port": "{{ port.split('-').1 |int }}",
+{%      elif port != '' %}
+          "dst-port-operator": "eq",
+          "destination-port": "{{ port |int }}",
+{%      endif %}
+          "index": "INDEX"
+        }{{ (last_rule and last_port and last_proto) |ternary('',',') }}
+{%   set ns.index = ns.index + 1 %}
+{%     endfor %}
+{%   endfor %}
+{% endfor %}
+]

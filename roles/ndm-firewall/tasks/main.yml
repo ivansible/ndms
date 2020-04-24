@@ -1,6 +1,8 @@
 ---
-- name: become root and install role
-  import_tasks: root.yml
-  become: true
-  tags: role_all
+- name: configure ndm firewall
+  import_tasks: firewall.yml
+  when: ndm_firewall |default({})
+  tags:
+    - ndm_firewall_acl
+    - ndm_firewall_all
 ...
