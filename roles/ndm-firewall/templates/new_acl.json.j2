@@ -1,6 +1,7 @@
 [
 {% set ns = namespace(index=0) %}
-{% for r in rules %}
+{% for r in rules if r.domain |default('inet',true) in ['ipv4', 'inet'] %}
+{#                   IPv6 is not fully supported by NDMS #}
 {%   set last_rule = loop.last %}
 {%   set disable = r.disable |default(false) |bool %}
 {%   set permit = r.permit |default(false) |bool %}
@@ -16,7 +17,7 @@
 {%   for port_tok in port_str.strip().split(',') %}
 {%     set last_port = loop.last %}
 {%     set port_s = port_tok.strip() |replace(':','-') %}
-{%     set port = port_s.split('/').0 if '/' in port_s else port_s %}
+{%     set dport = port_s.split('/').0 if '/' in port_s else port_s %}
 {%     set proto_str = port_s.split('/').1 if '/' in port_s else proto_val %}
 {%     set proto_list = ['tcp', 'udp'] if proto_str == 'inet' else [proto_str] %}
 {%     for proto in proto_list %}
@@ -42,13 +43,17 @@
           "destination": "0.0.0.0",
           "destination-mask": "0.0.0.0",
 {%      endif %}
-{%      if '-' in port %}
+{%      if '-' in dport %}
           "dst-port-operator": "range",
-          "destination-port": "{{ port.split('-').0 |int }}",
-          "destination-end-port": "{{ port.split('-').1 |int }}",
-{%      elif port != '' %}
+          "destination-port": "{{ dport.split('-').0 |int }}",
+          "destination-end-port": "{{ dport.split('-').1 |int }}",
+{%      elif dport %}
           "dst-port-operator": "eq",
-          "destination-port": "{{ port |int }}",
+          "destination-port": "{{ dport |int }}",
+{%      endif %}
+{%      if sport %}
+          "src-port-operator": "eq",
+          "source-port": "{{ sport |int }}",
 {%      endif %}
           "index": "INDEX"
         }{{ (last_rule and last_port and last_proto) |ternary('',',') }}

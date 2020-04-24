@@ -17,7 +17,7 @@
   vars:
     interface: "{{ item.0 }}"
     acl_name: "_WEBADMIN_{{ interface }}"
-    rules: "{{ item.1 |default([],true) }}"
+    rules: "{{ item.1 |default([],true) |flatten }}"
     ## to_nice_json sorts object fields by key making comparison possible
     new_acl: "{{ lookup('template', 'new_acl.json.j2') |to_nice_json(indent=0) }}"
     old_acl: "{{ ndm_firewall_old.response |json_query(query_old) |to_nice_json(indent=0) }}"
@@ -35,7 +35,7 @@
   vars:
     interface: "{{ item.0 }}"
     acl_name: "_WEBADMIN_{{ interface }}"
-    rules: "{{ item.1 |default([],true) }}"
+    rules: "{{ item.1 |default([],true) |flatten }}"
     comparing: false
   when: ndm_firewall_check.results[idx].changed
   tags: skip_ansible_lint
