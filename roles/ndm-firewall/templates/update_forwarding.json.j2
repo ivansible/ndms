@@ -1,0 +1,54 @@
+[
+{# Flush old rules #}
+  {
+    "ip": {
+      "static": {
+        "no":true
+      }
+    }
+  },
+{# Add new rules #}
+{% for r in ndm_forwarding if r.active |default(true) |bool %}
+{%   set use_mac = r.use_mac |default(false) |bool %}
+{%   set mac = ip2mac[r.target] |default('') %}
+  {
+    "ip": {
+      "static": {
+        "comment": "{{ r.name }}",
+{%   if use_mac and mac %}
+        "to-host": "{{ mac }}",
+{%   else %}
+        "to-address": "{{ r.target }}",
+{%   endif %}
+        "protocol": "{{ r.proto }}",
+        "port": "{{ r.port }}",
+        "interface": "{{ r.source }}"
+      }
+    }
+  },
+  {
+    "ip": {
+      "static": {
+        "schedule": {
+          "no": true
+        }
+      }
+    }
+  },
+  {
+    "ip": {
+      "static": {
+        "disable": {{ r.disable |default(false) |bool |to_json }}
+      }
+    }
+  },
+{% endfor %}
+{# Save configuration #}
+  {
+    "system": {
+      "configuration": {
+        "save": true
+      }
+    }
+  }
+]

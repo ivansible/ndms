@@ -1,3 +1,23 @@
 ---
 # defaults for ivansible.ndm_firewall
+
+ndm_firewall: {}            # map of devices with lists of firewall rules
+#  DEVICE1:                 # device name, follower by list of rules
+#    - [d]port: PORT[-RANGE][/PROTO][,...] # dest. port(s) or range(s) (optional)
+#      sport: PORT          # single source port (optional)
+#      proto: tcp|udp|inet  # protocol: tcp, udp or any (default: inet)
+#      src: IPv4|IPv6       # source IP address (optional)
+#      dst: IPv4|IPv6       # destination IP address (optional)
+#      permit: false        # permit or deny (default: deny)
+#      disable: false       # optional flag (default: false)
+
+ndm_forwarding: []          # list of firewall rules
+# - name: RULE1             # rule name             (REQUIRED)
+#   source: ISP             # source interface name (REQUIRED)
+#   proto: tcp|udp          # protocol: tcp or udp  (REQUIRED)
+#   port: 5060              # port number           (REQUIRED)
+#   target: 192.168.1.21    # target IPv4 address   (REQUIRED)
+#   use_mac: false          # use MAC-address if possible (optional: false)
+#   disable: false          # enable or disable rule (default: enable)
+#   active: true            # skip rule if not active (default: active)
 ...

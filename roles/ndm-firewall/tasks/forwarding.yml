@@ -1,0 +1,27 @@
+---
+- name: query ip-to-mac mapping
+  restconf_get:
+    path: /show/ip/hotspot
+  register: ndm_hotspots
+
+- name: query current forwarding rules
+  restconf_get:
+    path: /show/rc/ip/static
+  register: ndm_fwd_old
+
+- name: configure forwarding on keenetic ndm
+  restconf_config2:
+    path: ""
+    content: "{{ lookup('template', 'update_forwarding.json.j2') |to_json }}"
+  when: outdated
+  vars:
+    outdated: "{{ old_fwd != new_fwd }}"
+    query_old: '[] |map(&merge(@, `{"index": "INDEX"}`), @)'
+    ## to_nice_json sorts object fields by key making comparison possible
+    old_fwd: "{{ ndm_fwd_old.response |json_query(query_old) |to_nice_json }}"
+    new_fwd: "{{ lookup('template', 'new_forwarding.json.j2') |to_nice_json }}"
+    ip2mac: "{{ ndm_hotspots.response
+              | json_query('host[].{key: ip, value: mac}')
+              | items2dict }}"
+  tags: skip_ansible_lint
+...

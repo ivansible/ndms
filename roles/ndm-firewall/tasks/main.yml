@@ -5,4 +5,12 @@
   tags:
     - ndm_firewall_acl
     - ndm_firewall_all
+
+- name: configure ndm forwarding
+  import_tasks: forwarding.yml
+  when: ndm_forwarding |default([])
+  tags:
+    - ndm_forwarding
+    - ndm_firewall_fwd
+    - ndm_firewall_all
 ...
