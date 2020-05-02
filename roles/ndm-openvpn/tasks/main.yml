@@ -3,6 +3,7 @@
   restconf_get:
     path: /show/rc/interface
   register: ndm_if_config
+  until: ndm_if_config is successful
   when: ndm_ovpn_servers |default([])
   tags:
     - ndm_ovpn_all
