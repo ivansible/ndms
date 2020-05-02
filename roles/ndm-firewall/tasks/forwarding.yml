@@ -3,11 +3,13 @@
   restconf_get:
     path: /show/ip/hotspot
   register: ndm_hotspots
+  until: ndm_hotspots is successful
 
 - name: query current forwarding rules
   restconf_get:
     path: /show/rc/ip/static
   register: ndm_fwd_old
+  until: ndm_fwd_old is successful
 
 - name: configure forwarding on keenetic ndm
   restconf_config2:

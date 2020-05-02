@@ -3,6 +3,7 @@
   restconf_get:
     path: /show/rc/access-list
   register: ndm_firewall_old
+  until: ndm_firewall_old is successful
 
 - name: find outdated access lists on keenetic ndm
   debug:
