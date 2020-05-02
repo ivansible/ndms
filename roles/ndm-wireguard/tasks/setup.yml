@@ -3,11 +3,13 @@
   restconf_get:
     path: /show/interface
   register: ndm_if_states
+  until: ndm_if_states is successful
 
 - name: query ndm interface configs
   restconf_get:
     path: /show/rc/interface
   register: ndm_if_configs
+  until: ndm_if_configs is successful
 
 - name: find outdated wireguard interfaces
   debug:
