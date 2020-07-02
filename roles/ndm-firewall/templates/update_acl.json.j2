@@ -19,9 +19,7 @@
 {%   set port_val = r.dport |default(r.port) |default('')
                     if proto_val in ['tcp', 'udp', 'inet']
                     else '' %}
-{%   set port_str = port_val |string
-                    if port_val is string or port_val is integer
-                    else port_val |flatten |join(',') %}
+{%   set port_str = [port_val] |flatten |join(',') %}
 {%   for port_tok in port_str.strip().split(',') %}
 {%     set last_port = loop.last %}
 {%     set port_s = port_tok.strip() |replace(':','-') %}
