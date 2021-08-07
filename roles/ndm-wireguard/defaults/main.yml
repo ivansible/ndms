@@ -1,5 +1,5 @@
 ---
-# defaults for ivansible.ndm_wireguard
+## defaults for ivansible.ndm_wireguard
 
 ndm_wg_host: ~
 ndm_wg_port: 0
@@ -23,4 +23,12 @@ ndm_wg_peers: []
 #   pub: ~            - peer public key (REQUIRED)
 #   psk: ~            - pre-shared key (optional)
 #   ips: [ip/mask]    - allowed IPs, list of ip/mask pairs
+
+## attach access lists to wireguard interfaces
+ndm_wg_firewall_open: false
+ndm_wg_firewall_src_net: ~  # 10.0.0.0/8
+ndm_wg_firewall_rules:
+  - {proto: tcp, src: "{{ ndm_wg_firewall_src_net }}", permit: true}
+  - {proto: udp, src: "{{ ndm_wg_firewall_src_net }}", permit: true}
+  - {proto: icmp, src: "{{ ndm_wg_firewall_src_net }}", permit: true}
 ...

@@ -1,8 +1,20 @@
 ---
 - name: setup ndm wireguard
-  import_tasks: setup.yml
-  when: ndm_wg_peers |default([])
+  import_tasks: interfaces.yml
+  when:
+    - ndm_wg_peers |d([])
   tags:
+    - ndm_wg_interfaces
+    - ndm_wg_all
+    - ndm_wireguard_all
+
+- name: open firewall for wireguard interfaces
+  import_tasks: firewall.yml
+  when:
+    - ndm_wg_peers |d([])
+    - ndm_wg_firewall_open |bool
+  tags:
+    - ndm_wg_firewall
     - ndm_wg_all
     - ndm_wireguard_all
 ...

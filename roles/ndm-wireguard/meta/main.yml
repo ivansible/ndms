@@ -1,5 +1,6 @@
 ---
 dependencies: []
+# - ivansible.ndm_firewall  ## inherited implicitly
 
 galaxy_info:
   role_name: ndm_wireguard

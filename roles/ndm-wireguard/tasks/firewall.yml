@@ -1,0 +1,38 @@
+---
+- name: query current access lists on keenetic ndm
+  include_role:
+    name: ivansible.ndm_firewall
+    tasks_from: fw_query.yml
+    apply:
+      tags: [ndm_wg_firewall, ndm_wg_all, ndm_wireguard_all]
+
+- name: find outdated wireguard access lists on keenetic ndm
+  include_role:
+    name: ivansible.ndm_firewall
+    tasks_from: fw_check.yml
+    apply:
+      tags: [ndm_wg_firewall, ndm_wg_all, ndm_wireguard_all]
+  vars:
+    interface: "Wireguard{{ idx }}"
+    alias: "{{ item.name }}"
+    rules: "{{ ndm_wg_firewall_rules }}"
+  loop: "{{ ndm_wg_peers |d([],true) }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name }}"
+
+- name: configure wireguard access lists on keenetic ndm
+  include_role:
+    name: ivansible.ndm_firewall
+    tasks_from: fw_update.yml
+    apply:
+      tags: [ndm_wg_firewall, ndm_wg_all, ndm_wireguard_all]
+  vars:
+    interface: "Wireguard{{ idx }}"
+    rules: "{{ ndm_wg_firewall_rules }}"
+  when: ndm_firewall_check[interface]
+  loop: "{{ ndm_wg_peers |d([],true) }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name }}"
+...
