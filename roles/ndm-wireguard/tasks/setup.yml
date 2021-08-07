@@ -13,18 +13,18 @@
   debug:
     msg: "{{ item.name }} {{ outdated |bool |ternary('needs update', 'is ok') }}"
   changed_when: outdated
-  loop: "{{ ndm_wg_peers |default([],true) }}"
+  loop: "{{ ndm_wg_peers |d([],true) }}"
   loop_control:
     index_var: idx
     label: "{{ item.name }}"
   register: ndm_wg_check
   vars:
     ifname: "Wireguard{{ idx }}"
-    cfg: "{{ ndm_if_configs.response[ifname] |default({}) }}"
-    state: "{{ ndm_if_states.response[ifname] |default({}) }}"
+    cfg: "{{ ndm_if_configs.response[ifname] |d({}) }}"
+    state: "{{ ndm_if_states.response[ifname] |d({}) }}"
     old_config: "{{ lookup('template', 'old_config.json.j2') |to_json }}"
     new_config: "{{ lookup('template', 'new_config.json.j2') |to_json }}"
-    old_pubkey: "{{ state.wireguard['public-key'] |default('?') }}"
+    old_pubkey: "{{ state.wireguard['public-key'] |d('?') }}"
     new_pubkey: "{{ ndm_wg_pub }}"
     priv_key: 'cannot check private key'
     outdated: "{{ old_config != new_config or old_pubkey != new_pubkey }}"
@@ -34,7 +34,7 @@
     path: "/interface/Wireguard{{ idx }}"
     content: '{"no": true}'
   when: ndm_wg_check.results[idx].changed
-  loop: "{{ ndm_wg_peers |default([],true) }}"
+  loop: "{{ ndm_wg_peers |d([],true) }}"
   loop_control:
     label: "{{ item.name }}"
     index_var: idx
@@ -44,7 +44,7 @@
   restconf_config2:
     path: "/interface/Wireguard{{ idx }}"
     content: "{{ lookup('template', 'new_config.json.j2') |to_json }}"
-  loop: "{{ ndm_wg_peers |default([],true) }}"
+  loop: "{{ ndm_wg_peers |d([],true) }}"
   loop_control:
     label: "{{ item.name }}"
     index_var: idx

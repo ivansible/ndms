@@ -1,12 +1,12 @@
 {
-  "description": "{{ cfg.description |default('?') }}",
-  "up": {{ cfg.up |default(false) |bool |to_json }},
+  "description": "{{ cfg.description |d('?') }}",
+  "up": {{ cfg.up |d(false) |bool |to_json }},
   "ip": {
     "address": {
-      "address": "{{ cfg.ip.address.address |default('?') }}",
-      "mask": "{{ cfg.ip.address.mask |default('?') }}"
+      "address": "{{ cfg.ip.address.address |d('?') }}",
+      "mask": "{{ cfg.ip.address.mask |d('?') }}"
     },
-{% if cfg.ip.mtu |default(0) %}
+{% if cfg.ip.mtu |d(0) %}
       "mtu": "{{ cfg.ip.mtu }}",
 {% endif %}
     "tcp": {
@@ -20,7 +20,7 @@
   },
   "wireguard": {
     "listen-port": {
-{% if cfg.wireguard['listen-port'].port |default(0) %}
+{% if cfg.wireguard['listen-port'].port |d(0) %}
         "port": "{{ cfg.wireguard['listen-port'].port }}"
 {% else %}
         "no": true
@@ -28,31 +28,31 @@
     },
     "private-key": "{{ priv_key }}",
     "peer": [
-{% for peer in cfg.wireguard.peer |default([],true) %}
+{% for peer in cfg.wireguard.peer |d([],true) %}
       {
         "allow-ips": [
-{%   for ip in peer['allow-ips'] |default([],true) %}
+{%   for ip in peer['allow-ips'] |d([],true) %}
           {
-            "address": "{{ ip.address |default('?') }}",
-            "mask": "{{ ip.mask |default('?') }}"
+            "address": "{{ ip.address |d('?') }}",
+            "mask": "{{ ip.mask |d('?') }}"
           }{{ loop.last |ternary('',',') }}
 {%   endfor %}
         ],
-{%   if peer.endpoint.address |default('') %}
+{%   if peer.endpoint.address |d('') %}
         "endpoint": {
-          "address": "{{ peer.endpoint.address |default('?') }}"
+          "address": "{{ peer.endpoint.address |d('?') }}"
         },
 {%   endif %}
-{%   if peer['keepalive-interval'].interval |default(0) %}
+{%   if peer['keepalive-interval'].interval |d(0) %}
         "keepalive-interval": {
           "interval": {{ peer['keepalive-interval'].interval }}
         },
 {%   endif %}
-{%   if peer['preshared-key'] |default('') %}
+{%   if peer['preshared-key'] |d('') %}
         "preshared-key": "{{ peer['preshared-key'] }}",
 {%   endif %}
-        "key": "{{ peer.key |default('?') }}",
-        "comment": "{{ peer.comment |default('?') }}"
+        "key": "{{ peer.key |d('?') }}",
+        "comment": "{{ peer.comment |d('?') }}"
       }{{ loop.last |ternary('',',') }}
 {% endfor %}
     ]
