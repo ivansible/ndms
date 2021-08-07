@@ -1,5 +1,7 @@
 ---
-# defaults for ivansible.ndm_firewall
+## defaults for ivansible.ndm_firewall
+
+ndm_firewall_noupdate: false
 
 ndm_firewall: {}            # map of devices with lists of firewall rules
 #  DEVICE1:                 # device name, follower by list of rules

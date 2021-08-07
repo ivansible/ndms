@@ -1,43 +1,33 @@
 ---
 - name: query current access lists on keenetic ndm
-  restconf_get:
-    path: /show/rc/access-list
-  register: ndm_firewall_old
-  until: ndm_firewall_old is successful
+  include_tasks: fw_query.yml
+  args:
+    apply:
+      tags: [ndm_firewall_acl, ndm_firewall_all]
 
 - name: find outdated access lists on keenetic ndm
-  debug:
-    msg: "{{ interface }} {{ outdated |bool |ternary('needs update', 'is ok') }}"
-  when: interface is not match('SKIP_|skip_')
-        and rules |default([])
-  changed_when: outdated
-  loop: "{{ ndm_firewall |default({},true) |dictsort }}"
-  loop_control:
-    label: "{{ item.0 }}"
-  register: ndm_firewall_check
+  include_tasks: fw_check.yml
+  args:
+    apply:
+      tags: [ndm_firewall_acl, ndm_firewall_all]
   vars:
     interface: "{{ item.0 }}"
-    acl_name: "_WEBADMIN_{{ interface }}"
-    rules: "{{ item.1 |default([],true) |flatten }}"
-    ## to_nice_json sorts object fields by key making comparison possible
-    new_acl: "{{ lookup('template', 'new_acl.json.j2') |to_nice_json(indent=0) }}"
-    old_acl: "{{ ndm_firewall_old.response |json_query(query_old) |to_nice_json(indent=0) }}"
-    query_old: "[?acl == `{{ acl_name }}`] |map(&merge(@, `{\"index\": \"INDEX\"}`), @)"
-    outdated: "{{ new_acl != old_acl }}"
+    rules: "{{ item.1 |d([],true) |flatten }}"
+  loop: "{{ ndm_firewall |d({},true) |dictsort }}"
+  loop_control:
+    label: "{{ item.0 }}"
 
 - name: configure access lists on keenetic ndm
-  restconf_config2:
-    path: ""
-    content: "{{ lookup('template', 'update_acl.json.j2') |to_json }}"
-  loop: "{{ ndm_firewall |default({},true) |dictsort }}"
+  include_tasks: fw_update.yml
+  args:
+    apply:
+      tags: [ndm_firewall_acl, ndm_firewall_all]
+  vars:
+    interface: "{{ item.0 }}"
+    rules: "{{ item.1 |d([],true) |flatten }}"
+  when: ndm_firewall_check[interface]
+  loop: "{{ ndm_firewall |d({},true) |dictsort }}"
   loop_control:
     index_var: idx
     label: "{{ item.0 }}"
-  vars:
-    interface: "{{ item.0 }}"
-    acl_name: "_WEBADMIN_{{ interface }}"
-    rules: "{{ item.1 |default([],true) |flatten }}"
-    comparing: false
-  when: ndm_firewall_check.results[idx].changed
-  tags: skip_ansible_lint
 ...

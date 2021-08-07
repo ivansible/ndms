@@ -1,14 +1,14 @@
 [
 {% set ns = namespace(index=0) %}
-{% for r in rules if r.domain |default('inet',true) in ['ipv4', 'inet'] %}
+{% for r in rules if r.domain |d('inet',true) in ['ipv4', 'inet'] %}
 {#                   IPv6 is not fully supported by NDMS #}
 {%   set last_rule = loop.last %}
-{%   set disable = r.disable |default(false) |bool %}
-{%   set permit = r.permit |default(false) |bool %}
+{%   set disable = r.disable |d(false) |bool %}
+{%   set permit = r.permit |d(false) |bool %}
 {%   set action = permit |ternary('permit', 'deny') %}
-{%   set sport = r.sport |default(0,true) |int %}
-{%   set proto_val = r.proto |default('inet', true) %}
-{%   set port_val = r.dport |default(r.port) |default('')
+{%   set sport = r.sport |d(0,true) |int %}
+{%   set proto_val = r.proto |d('inet', true) %}
+{%   set port_val = r.dport |d(r.port) |d('')
                     if proto_val in ['tcp', 'udp', 'inet']
                     else '' %}
 {%   set port_str = [port_val] |flatten |join(',') %}
@@ -27,14 +27,14 @@
           "disable": true,
 {% endif %}
           "protocol": "{{ proto }}",
-{%      if r.src |default('') %}
+{%      if r.src |d('') %}
           "source": "{{ r.src |ipaddr('address') or r.src |ipaddr('network') }}",
           "source-mask": "{{ r.src |ipaddr('netmask') }}",
 {%      else %}
           "source": "0.0.0.0",
           "source-mask": "0.0.0.0",
 {%      endif %}
-{%      if r.dst |default('') %}
+{%      if r.dst |d('') %}
           "destination": "{{ r.dst |ipaddr('address') or r.dst |ipaddr('network') }}",
           "destination-mask": "{{ r.dst |ipaddr('netmask') }}",
 {%      else %}

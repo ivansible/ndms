@@ -1,0 +1,29 @@
+---
+## input: interface
+## input: alias
+## input: rules
+## input: ndm_firewall_old
+## output: ndm_firewall_check
+- name: find outdated access lists on keenetic ndm
+  debug:
+    msg:
+      - "{{ interface }} ({{ alias |d(interface, true) }}) {{ outdated |bool |ternary('needs update', 'is ok') }}"
+      # "{{ old_acl }}"
+      # "{{ new_acl }}"
+  when:
+    - interface is not match('SKIP_|skip_')
+    - rules |d([])
+  changed_when: outdated
+  register: ndm_firewall_check_list
+  vars:
+    acl_name: "_WEBADMIN_{{ interface }}"
+    ## to_nice_json sorts object fields by key making comparison possible
+    new_acl: "{{ lookup('template', 'new_acl.json.j2') |to_nice_json(indent=0) }}"
+    old_acl: "{{ ndm_firewall_old.response |json_query(query_old) |to_nice_json(indent=0) }}"
+    query_old: "[?acl == `{{ acl_name }}`] |map(&merge(@, `{\"index\": \"INDEX\"}`), @)"
+    outdated: "{{ new_acl != old_acl }}"
+
+- name: register check result
+  set_fact:
+    ndm_firewall_check: "{{ ndm_firewall_check |d({}) |combine({ interface: ndm_firewall_check_list is changed }) }}"
+...

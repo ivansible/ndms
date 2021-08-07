@@ -1,0 +1,13 @@
+---
+## input: interface
+## input: rules
+- name: configure access lists on keenetic ndm
+  restconf_config2:
+    path: ""
+    content: "{{ lookup('template', 'update_acl.json.j2') |to_json }}"
+  vars:
+    acl_name: "_WEBADMIN_{{ interface }}"
+    comparing: false
+  when: not ndm_firewall_noupdate |bool
+  tags: skip_ansible_lint
+...

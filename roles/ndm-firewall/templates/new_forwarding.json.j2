@@ -1,7 +1,7 @@
 [
-{% for r in ndm_forwarding if r.active |default(true) |bool %}
-{%   set use_mac = r.use_mac |default(false) |bool %}
-{%   set mac = ip2mac[r.target] |default('') %}
+{% for r in ndm_forwarding if r.active |d(true) |bool %}
+{%   set use_mac = r.use_mac |d(false) |bool %}
+{%   set mac = ip2mac[r.target] |d('') %}
     {
       "comment": "{{ r.name }}",
 {%   if use_mac and mac %}
@@ -11,7 +11,7 @@
 {%   endif %}
       "protocol": "{{ r.proto }}",
       "port": "{{ r.port }}",
-{% if r.disable |default(false) |bool %}
+{% if r.disable |d(false) |bool %}
       "disable": true,
 {% endif %}
       "interface": "{{ r.source }}",
