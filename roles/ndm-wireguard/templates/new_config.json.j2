@@ -20,15 +20,16 @@
   },
   "wireguard": {
     "listen-port": {
-{% if ndm_wg_port |d(0) %}
-        "port": "{{ ndm_wg_port |int }}"
+{% set listen_port = item.listen |d(ndm_wg_port) |d(0) |int %}
+{% if listen_port %}
+        "port": "{{ listen_port }}"
 {% else %}
         "no": true
 {% endif %}
     },
     "private-key": "{{ priv_key }}",
     "peer": [
-{% for peer in [item] %}
+{% macro make_peer(peer, keepalive, last) %}
       {
         "allow-ips": [
 {%   for ip in peer.ips |d([],true) %}
@@ -43,9 +44,9 @@
           "address": "{{ peer.host }}:{{ peer.port |int }}"
         },
 {%   endif %}
-{%   if ndm_wg_keepalive |d(0) %}
+{%   if keepalive %}
         "keepalive-interval": {
-          "interval": {{ ndm_wg_keepalive |int }}
+          "interval": {{ keepalive }}
         },
 {%   endif %}
 {%   if peer.psk |d('') %}
@@ -53,7 +54,12 @@
 {%   endif %}
         "key": "{{ peer.pub }}",
         "comment": "{{ peer.name }}"
-      }{{ loop.last |ternary('',',') }}
+      }{{ last |ternary('',',') }}
+{% endmacro %}
+{% set slaves = item.slaves |d([],true) %}
+{{ make_peer(item, ndm_wg_keepalive |d(0) |int, slaves |length == 0) }}
+{% for peer in slaves %}
+{{ make_peer(peer, 0, loop.last) }}
 {% endfor %}
     ]
   }
