@@ -12,7 +12,7 @@
   until: ndm_fwd_old is successful
 
 - name: configure forwarding on keenetic ndm
-  restconf_config2:
+  ivansible.ndms.restconf_config2:
     path: ""
     content: "{{ lookup('template', 'update_forwarding.json.j2') |to_json }}"
   when: outdated

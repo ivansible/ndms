@@ -2,7 +2,7 @@
 ## input: interface
 ## input: rules
 - name: configure access lists on keenetic ndm
-  restconf_config2:
+  ivansible.ndms.restconf_config2:
     path: ""
     content: "{{ lookup('template', 'update_acl.json.j2') |to_json }}"
   vars:

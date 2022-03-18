@@ -11,7 +11,7 @@
 
 
 - name: configure ndm openvpn interfaces
-  restconf_config2:
+  ivansible.ndms.restconf_config2:
     path: "/interface/{{ if_name }}"
     content: "{{ request_body |to_json }}"
   when: update |bool
@@ -84,7 +84,7 @@
 
 
 - name: save new ndm configuration
-  restconf_config2:
+  ivansible.ndms.restconf_config2:
     path: /system/configuration
     content: '{"save": true}'
   ## flush_handlers is unsupported on this connection

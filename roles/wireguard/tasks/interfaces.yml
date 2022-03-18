@@ -32,7 +32,7 @@
     outdated: "{{ old_config != new_config or old_pubkey != new_pubkey }}"
 
 - name: flush outdated wireguard interfaces
-  restconf_config2:
+  ivansible.ndms.restconf_config2:
     path: "/interface/Wireguard{{ item.index |d(item_idx) }}"
     content: '{"no": true}'
   when: ndm_wg_check.results[idx].changed
@@ -43,7 +43,7 @@
   tags: skip_ansible_lint
 
 - name: configure wireguard interfaces
-  restconf_config2:
+  ivansible.ndms.restconf_config2:
     path: "/interface/Wireguard{{ item.index |d(idx) }}"
     content: "{{ lookup('template', 'new_config.json.j2') |to_json }}"
   loop: "{{ ndm_wg_peers |d([],true) }}"
@@ -56,7 +56,7 @@
   tags: skip_ansible_lint
 
 - name: save new wireguard configuration
-  restconf_config2:
+  ivansible.ndms.restconf_config2:
     path: /system/configuration
     content: '{"save": true}'
   ## flush_handlers is unsupported on this connection
