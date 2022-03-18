@@ -21,7 +21,7 @@
     label: "{{ item.name }}"
   register: ndm_wg_check
   vars:
-    ifname: "Wireguard{{ idx }}"
+    ifname: "Wireguard{{ item.index |d(idx) }}"
     cfg: "{{ ndm_if_configs.response[ifname] |d({}) }}"
     state: "{{ ndm_if_states.response[ifname] |d({}) }}"
     old_config: "{{ lookup('template', 'old_config.json.j2') |to_json }}"
@@ -33,7 +33,7 @@
 
 - name: flush outdated wireguard interfaces
   restconf_config2:
-    path: "/interface/Wireguard{{ idx }}"
+    path: "/interface/Wireguard{{ item.index |d(item_idx) }}"
     content: '{"no": true}'
   when: ndm_wg_check.results[idx].changed
   loop: "{{ ndm_wg_peers |d([],true) }}"
@@ -44,7 +44,7 @@
 
 - name: configure wireguard interfaces
   restconf_config2:
-    path: "/interface/Wireguard{{ idx }}"
+    path: "/interface/Wireguard{{ item.index |d(idx) }}"
     content: "{{ lookup('template', 'new_config.json.j2') |to_json }}"
   loop: "{{ ndm_wg_peers |d([],true) }}"
   loop_control:
