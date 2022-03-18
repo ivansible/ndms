@@ -42,7 +42,7 @@
       schedule: {'no': true}
       up: {'no': "{{ not new_active }}"}
 
-    if_name: "OpenVPN{{ item_idx }}"
+    if_name: "OpenVPN{{ item.index |default(item_idx) }}"
     if_object: "{{ ndm_if_config.response[if_name] |default({}) }}"
     update: "{{ old_ifname != new_ifname or old_active != new_active or old_config != new_config }}"
 
