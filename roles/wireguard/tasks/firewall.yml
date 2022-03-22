@@ -1,14 +1,14 @@
 ---
 - name: query current access lists on keenetic ndm
   include_role:
-    name: ivansible.ndm_firewall
+    name: ivansible.ndms.firewall
     tasks_from: fw_query.yml
     apply:
       tags: [ndm_wg_firewall, ndm_wg_all, ndm_wireguard_all]
 
 - name: find outdated wireguard access lists on keenetic ndm
   include_role:
-    name: ivansible.ndm_firewall
+    name: ivansible.ndms.firewall
     tasks_from: fw_check.yml
     apply:
       tags: [ndm_wg_firewall, ndm_wg_all, ndm_wireguard_all]
@@ -23,7 +23,7 @@
 
 - name: configure wireguard access lists on keenetic ndm
   include_role:
-    name: ivansible.ndm_firewall
+    name: ivansible.ndms.firewall
     tasks_from: fw_update.yml
     apply:
       tags: [ndm_wg_firewall, ndm_wg_all, ndm_wireguard_all]
