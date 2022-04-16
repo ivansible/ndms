@@ -1,6 +1,6 @@
 ---
 - name: setup ndm wireguard
-  import_tasks: interfaces.yml
+  ansible.builtin.import_tasks: interfaces.yml
   when:
     - ndm_wg_peers |d([])
   tags:
@@ -9,7 +9,7 @@
     - ndm_wireguard_all
 
 - name: open firewall for wireguard interfaces
-  import_tasks: firewall.yml
+  ansible.builtin.import_tasks: firewall.yml
   when:
     - ndm_wg_peers |d([])
     - ndm_wg_firewall_open |bool

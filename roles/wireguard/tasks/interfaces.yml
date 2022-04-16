@@ -1,18 +1,18 @@
 ---
 - name: query ndm interface states
-  restconf_get:
+  ansible.netcommon.restconf_get:
     path: /show/interface
   register: ndm_if_states
   until: ndm_if_states is successful
 
 - name: query ndm interface configs
-  restconf_get:
+  ansible.netcommon.restconf_get:
     path: /show/rc/interface
   register: ndm_if_configs
   until: ndm_if_configs is successful
 
 - name: find outdated wireguard interfaces
-  debug:
+  ansible.builtin.debug:
     msg: "{{ item.name }} {{ outdated |bool |ternary('needs update', 'is ok') }}"
   changed_when: outdated
   loop: "{{ ndm_wg_peers |d([],true) }}"

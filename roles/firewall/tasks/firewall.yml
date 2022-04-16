@@ -1,12 +1,12 @@
 ---
 - name: query current access lists on keenetic ndm
-  include_tasks: fw_query.yml
+  ansible.builtin.include_tasks: fw_query.yml
   args:
     apply:
       tags: [ndm_firewall_acl, ndm_firewall_all]
 
 - name: find outdated access lists on keenetic ndm
-  include_tasks: fw_check.yml
+  ansible.builtin.include_tasks: fw_check.yml
   args:
     apply:
       tags: [ndm_firewall_acl, ndm_firewall_all]
@@ -18,7 +18,7 @@
     label: "{{ item.0 }}"
 
 - name: configure access lists on keenetic ndm
-  include_tasks: fw_update.yml
+  ansible.builtin.include_tasks: fw_update.yml
   args:
     apply:
       tags: [ndm_firewall_acl, ndm_firewall_all]

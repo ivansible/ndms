@@ -5,7 +5,7 @@
 ## input: ndm_firewall_old
 ## output: ndm_firewall_check
 - name: find outdated access lists on keenetic ndm
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ interface }} ({{ alias |d(interface, true) }}) {{ outdated |bool |ternary('needs update', 'is ok') }}"
       # "{{ old_acl }}"
@@ -24,6 +24,6 @@
     outdated: "{{ new_acl != old_acl }}"
 
 - name: register check result
-  set_fact:
+  ansible.builtin.set_fact:
     ndm_firewall_check: "{{ ndm_firewall_check |d({}) |combine({ interface: ndm_firewall_check_list is changed }) }}"
 ...

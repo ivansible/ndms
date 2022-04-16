@@ -1,14 +1,14 @@
 ---
 - name: configure ndm firewall
-  import_tasks: firewall.yml
-  when: ndm_firewall |default({})
+  ansible.builtin.import_tasks: firewall.yml
+  when: ndm_firewall |d({})
   tags:
     - ndm_firewall_acl
     - ndm_firewall_all
 
 - name: configure ndm forwarding
-  import_tasks: forwarding.yml
-  when: ndm_forwarding |default([])
+  ansible.builtin.import_tasks: forwarding.yml
+  when: ndm_forwarding |d([])
   tags:
     - ndm_forwarding
     - ndm_firewall_fwd
