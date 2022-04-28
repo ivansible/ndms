@@ -56,6 +56,7 @@
     server_name: ndm
     client_name: "{{ item.name }}"
     server_host: "{{ item.host }}"
+    client_server_host: "{{ server_host }}"
     server_cname: "{{ item.cname }}"
     visible_port: "{{ item.port }}"
     client_proto: "{{ 'udp' if item.proto == 'udp' else 'tcp-client' }}"
@@ -72,12 +73,10 @@
     ovpn_ca_cert: "{{ item.ca_cert }}"
     ovpn_tlscrypt_key: "{{ item.tlscrypt_key }}"
 
-    ovpn_curve: "{{ ndm_ovpn_curve }}"
+    ovpn_tls13: "{{ ndm_ovpn_tls13 }}"
     ovpn_cipher: "{{ ndm_ovpn_cipher }}"
-    ovpn_cc_cipher: "{{ ndm_ovpn_cc_cipher }}"
     ovpn_hmac_alg: "{{ ndm_ovpn_hmac_alg }}"
     ovpn_reneg_sec: "{{ ndm_ovpn_reneg_sec }}"
-    ovpn_compress: "{{ ndm_ovpn_compress }}"
 
     client_device: tun
     interface_name: ~
