@@ -33,7 +33,7 @@
 
 - name: flush outdated wireguard interfaces
   ivansible.ndms.restconf_config2:
-    path: "/interface/Wireguard{{ item.index |d(item_idx) }}"
+    path: "/interface/Wireguard{{ item.index |d(idx) }}"
     content: '{"no": true}'
   when: ndm_wg_check.results[idx].changed
   loop: "{{ ndm_wg_peers |d([],true) }}"
