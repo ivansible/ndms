@@ -39,7 +39,7 @@
           }{{ loop.last |ternary('',',') }}
 {%   endfor %}
         ],
-{%   if peer.host |d('') and peer.port |d(0) %}
+{%   if peer.host |d('') and peer.port |d(0) |int %}
         "endpoint": {
           "address": "{{ peer.host }}:{{ peer.port |int }}"
         },
@@ -57,9 +57,11 @@
       }{{ last |ternary('',',') }}
 {% endmacro %}
 {% set slaves = item.slaves |d([],true) %}
-{{ make_peer(item, ndm_wg_keepalive |d(0) |int, slaves |length == 0) }}
+{% if item.host |d('') and item.port |d(0) |int %}
+{{   make_peer(item, ndm_wg_keepalive |d(0) |int, slaves |length == 0) }}
+{% endif %}
 {% for peer in slaves %}
-{{ make_peer(peer, 0, loop.last) }}
+{{   make_peer(peer, 0, loop.last) }}
 {% endfor %}
     ]
   }
