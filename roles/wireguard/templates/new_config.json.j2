@@ -3,7 +3,8 @@
   "up": {{ item.active |d(true) |bool |to_json }},
   "ip": {
     "address": {
-      "address": "{{ item.addr |d(ndm_wg_addr) |ipaddr('address') or addr |ipaddr('network') }}",
+{% set item_addr = item.addr |d(ndm_wg_addr) %}
+      "address": "{{ item_addr |ipaddr('address') or item_addr |ipaddr('network') }}",
       "mask": "{{ item.addr |d(ndm_wg_addr) |ipaddr('netmask') }}"
     },
 {% if ndm_wg_mtu |d(0) %}
@@ -32,7 +33,7 @@
 {% macro make_peer(peer, keepalive, last) %}
       {
         "allow-ips": [
-{%   for ip in peer.ips |d([],true) %}
+{%   for ip in peer.ips |d([],true) |ansible.utils.ipv4 %}
           {
             "address": "{{ ip |ipaddr('address') or ip |ipaddr('network') }}",
             "mask": "{{ ip |ipaddr('netmask') }}"
